@@ -27,11 +27,27 @@ ledgerflow/
 From the repository root:
 
 ```powershell
+docker compose up -d
 cd ledgerflow-backend
 .\mvnw.cmd spring-boot:run
 ```
 
-The application requires a PostgreSQL datasource configuration. Until PostgreSQL is configured, startup is expected to stop with a datasource or database connection error.
+PostgreSQL runs in Docker on `localhost:5432`, while Spring Boot runs locally. The default development database is `ledgerflow`, using the `ledgerflow` user. You can override the connection without editing source files:
+
+```powershell
+$env:DB_URL = "jdbc:postgresql://localhost:5432/ledgerflow"
+$env:DB_USERNAME = "ledgerflow"
+$env:DB_PASSWORD = "your-password"
+```
+
+Check the database and stop it with:
+
+```powershell
+docker compose ps
+docker compose down
+```
+
+The named Docker volume keeps the database data between container restarts. Use `docker compose down -v` only when you intentionally want to delete the development data.
 
 ## Roadmap
 
