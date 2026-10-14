@@ -24,6 +24,10 @@ ledgerflow/
 
 ## Getting started
 
+For an entirely Docker-based launch, run `docker compose --profile app up --build -d`.
+The API is then available at `http://localhost:8080`. Alternatively, use the local
+Java development workflow below.
+
 From the repository root:
 
 ```powershell
@@ -50,6 +54,14 @@ docker compose down
 The named Docker volume keeps the database data between container restarts. Use `docker compose down -v` only when you intentionally want to delete the development data.
 
 ## Roadmap
+
+The banking backend implements accounts, balances, deposits, withdrawals,
+atomic same-currency transfers, globally idempotent retries and paginated history.
+A balanced double-entry journal records every movement, including opening funds.
+JPA and Flyway manage persistence and backward-compatible schema migrations.
+See [Banking API](docs/banking-api.md) for examples, guarantees, limitations and tests.
+GitHub Actions verifies the backend on H2 and PostgreSQL 18.
+Kafka/Outbox, data pipelines and authentication remain future work.
 
 1. Build the core banking domain as a modular monolith.
 2. Add PostgreSQL persistence and database migrations.

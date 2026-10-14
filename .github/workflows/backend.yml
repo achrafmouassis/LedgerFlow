@@ -1,0 +1,43 @@
+name: Backend verification
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ledgerflow-backend
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: ledgerflow_test
+          POSTGRES_USER: ledgerflow
+          POSTGRES_PASSWORD: test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ledgerflow -d ledgerflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Allow Maven wrapper execution
+        run: chmod +x mvnw
+      - name: H2 tests
+        run: ./mvnw --batch-mode test
+      - name: PostgreSQL tests and package
+        run: ./mvnw --batch-mode verify
+        env:
+          TEST_DB_URL: jdbc:postgresql://localhost:5432/ledgerflow_test
+          TEST_DB_USERNAME: ledgerflow
+          TEST_DB_PASSWORD: test_only

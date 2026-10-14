@@ -1,4 +1,16 @@
 services:
+  backend:
+    profiles: [app]
+    build: ./ledgerflow-backend
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/ledgerflow
+      DB_USERNAME: ledgerflow
+      DB_PASSWORD: ledgerflow_dev
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
   postgres:
     image: postgres:18
     container_name: ledgerflow-postgres
