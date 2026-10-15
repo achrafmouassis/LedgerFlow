@@ -16,13 +16,21 @@ public class BankingService {
     private final AccountRepository accounts;
     private final TransferRepository transfers;
     private final JournalRepository journals;
-    public BankingService(AccountRepository accounts, TransferRepository transfers, JournalRepository journals) {
-        this.accounts = accounts; this.transfers = transfers; this.journals = journals;
+    private final com.ledgerflow.pipeline.OutboxCapture outbox;
+    public BankingService(AccountRepository accounts, TransferRepository transfers, JournalRepository journals,
+            com.ledgerflow.pipeline.OutboxCapture outbox) {
+        this.accounts = accounts; this.transfers = transfers; this.journals = journals; this.outbox = outbox;
+    }
+    private Journal record(Journal journal) {
+        // Flush journal FK first; both writes still belong to this banking transaction.
+        journals.saveAndFlush(journal);
+        outbox.record(journal.event());
+        return journal;
     }
     public AccountView create(CreateAccount request) {
         Account account = accounts.save(new Account(request.owner().strip(), request.currency(),
             money(request.openingBalance(), true)));
-        if (account.balance.signum() > 0) journals.save(Journal.opening(account));
+        if (account.balance.signum() > 0) record(Journal.opening(account));
         return AccountView.of(account);
     }
     @Transactional(readOnly = true)
@@ -67,7 +75,7 @@ public class BankingService {
         destination.balance = destination.balance.add(amount);
         // The unique key is a database-level guard, including requests using unrelated accounts.
         Transfer transfer = transfers.saveAndFlush(new Transfer(key, source, destination, amount));
-        journals.saveAndFlush(Journal.transfer(transfer));
+        record(Journal.transfer(transfer));
         return TransferView.of(transfer);
     }
     public CashView deposit(UUID id, String key, CashRequest request) {
@@ -99,7 +107,7 @@ public class BankingService {
         if (next.compareTo(MAX_BALANCE) > 0)
             throw error(HttpStatus.CONFLICT, "BALANCE_LIMIT", "Account balance limit exceeded");
         account.balance = next;
-        return CashView.of(journals.saveAndFlush(Journal.cash(account, type, key, amount)));
+        return CashView.of(record(Journal.cash(account, type, key, amount)));
     }
     private BigDecimal money(BigDecimal value, boolean allowZero) {
         if (value == null || value.signum() < 0 || (!allowZero && value.signum() == 0)

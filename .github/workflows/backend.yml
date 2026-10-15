@@ -11,6 +11,15 @@ jobs:
       run:
         working-directory: ledgerflow-backend
     services:
+      kafka:
+        image: apache/kafka:4.1.2
+        ports:
+          - 9092:9092
+        options: >-
+          --health-cmd "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
       postgres:
         image: postgres:18
         env:
@@ -35,9 +44,10 @@ jobs:
         run: chmod +x mvnw
       - name: H2 tests
         run: ./mvnw --batch-mode test
-      - name: PostgreSQL tests and package
+      - name: PostgreSQL and real Kafka tests, then package
         run: ./mvnw --batch-mode verify
         env:
           TEST_DB_URL: jdbc:postgresql://localhost:5432/ledgerflow_test
           TEST_DB_USERNAME: ledgerflow
           TEST_DB_PASSWORD: test_only
+          TEST_KAFKA_BOOTSTRAP: localhost:9092

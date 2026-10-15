@@ -27,7 +27,7 @@ class JournalMigrationTests {
             jdbc.update("INSERT INTO "+sqlSchema+".accounts(id,owner,currency,balance) VALUES (?,'Source','MAD',70)",source);
             jdbc.update("INSERT INTO "+sqlSchema+".accounts(id,owner,currency,balance) VALUES (?,'Destination','MAD',30)",destination);
             jdbc.update("INSERT INTO "+sqlSchema+".transfers(id,idempotency_key,source_account_id,destination_account_id,amount,currency,created_at) VALUES (?,'legacy-key',?,?,30,'MAD',CURRENT_TIMESTAMP)",transfer,source,destination);
-            Flyway.configure().dataSource(dataSource).schemas(schema).defaultSchema(schema).load().migrate();
+            Flyway.configure().dataSource(dataSource).schemas(schema).defaultSchema(schema).target("2").load().migrate();
             assertEquals(2,jdbc.queryForObject("SELECT COUNT(*) FROM "+sqlSchema+".journals",Integer.class));
             assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM "+sqlSchema+".journals WHERE type='OPENING' AND credit_account_id=? AND amount=100",Integer.class,source));
             assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM "+sqlSchema+".journals WHERE type='TRANSFER' AND id=? AND transfer_id=? AND idempotency_key='legacy-key'",Integer.class,transfer,transfer));

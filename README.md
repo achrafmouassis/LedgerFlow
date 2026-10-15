@@ -61,9 +61,19 @@ A balanced double-entry journal records every movement, including opening funds.
 JPA and Flyway manage persistence and backward-compatible schema migrations.
 See [Banking API](docs/banking-api.md) for examples, guarantees, limitations and tests.
 GitHub Actions verifies the backend on H2 and PostgreSQL 18.
-Kafka/Outbox, data pipelines and authentication remain future work.
+The first data stage now implements a transactional Outbox, Kafka delivery,
+idempotent analytical ingestion and daily reporting. See
+[Data pipeline](docs/data-pipeline.md) for patterns, guarantees and tests.
+Spark/PySpark, Airflow, Power BI and authentication remain future work.
 
-1. Build the core banking domain as a modular monolith.
-2. Add PostgreSQL persistence and database migrations.
-3. Introduce event-driven processing and an outbox pattern.
-4. Add data ingestion, observability, testing, and deployment infrastructure.
+Run banking plus Kafka with:
+
+```powershell
+docker compose -f compose.yaml -f compose.pipeline.yaml --profile app up --build -d
+```
+
+- [x] Core banking domain as a modular monolith, with balanced journal.
+- [x] PostgreSQL persistence, Flyway migrations and automated tests.
+- [x] Transactional Outbox, Kafka and an idempotent analytical read model.
+- [ ] Spark/PySpark transformations and Airflow orchestration.
+- [ ] Dimensional analytics, Power BI and expanded operational monitoring.

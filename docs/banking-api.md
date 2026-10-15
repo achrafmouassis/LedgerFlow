@@ -130,4 +130,6 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/accounts/$($bob.id)/journal"
 After the transfer example above, Bob now has 180.00 MAD. Both new operations
 return their original operation ID and date when retried with the same key/body.
 
-Next increments: Kafka/Outbox and data pipelines, followed by security.
+The [first data pipeline](data-pipeline.md) now captures these journal records
+through Outbox/Kafka and builds an analytical read model. Spark, Airflow, Power BI
+and security are later increments.

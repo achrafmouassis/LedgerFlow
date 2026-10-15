@@ -46,4 +46,9 @@ public class Journal {
             type == Type.DEPOSIT ? account.id : null,
             amount, account.currency, Instant.now(), null);
     }
+    public com.ledgerflow.pipeline.OperationEvent event() {
+        return new com.ledgerflow.pipeline.OperationEvent(1,id,id,type.name(),debitAccountId,
+            creditAccountId,amount,currency,createdAt);
+    }
+
 }
