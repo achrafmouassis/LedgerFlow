@@ -3,3 +3,9 @@ smoke-run.log
 docker-build.log
 kafka-test-run.log
 pipeline-smoke.log
+batch-build.log
+batch-test.log
+batch-smoke.log
+__pycache__/
+.pytest_cache/
+*.pyc

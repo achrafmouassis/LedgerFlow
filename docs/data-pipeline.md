@@ -12,8 +12,9 @@
 | CQRS-style read projection | Separate `analytics` schema and reporting API; asynchronous updates | Keep analytical reads separate from banking writes |
 | Dead Letter Queue | Invalid JSON, unsupported versions and conflicting event payloads are preserved in `<topic>.DLT` | Quarantine bad events while retaining evidence |
 
-This is streaming ETL, not a batch ETL/ELT job, CDC connector, Lambda architecture,
-full event-sourced banking system or Spark pipeline. The relay polls explicit
+The ingestion stage is streaming ETL. A separate [daily PySpark batch](batch-pyspark.md)
+now materializes summaries from its facts. The streaming stage itself is not a
+CDC connector, Lambda architecture or full event-sourced banking system. The relay polls explicit
 business events; it does not read the PostgreSQL WAL. There is no Debezium or
 Schema Registry in this increment.
 

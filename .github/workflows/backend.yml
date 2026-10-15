@@ -51,3 +51,32 @@ jobs:
           TEST_DB_USERNAME: ledgerflow
           TEST_DB_PASSWORD: test_only
           TEST_KAFKA_BOOTSTRAP: localhost:9092
+
+  batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: ledgerflow_batch_test
+          POSTGRES_USER: ledgerflow
+          POSTGRES_PASSWORD: test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ledgerflow -d ledgerflow_batch_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PySpark batch image
+        run: docker build -t ledgerflow-batch-test data-pipeline
+      - name: Spark unit and PostgreSQL integration tests
+        run: >-
+          docker run --rm --network host --entrypoint python3
+          --mount "type=bind,source=${{ github.workspace }}/ledgerflow-backend/src/main/resources/db/migration,target=/migrations,readonly"
+          -e BATCH_INTEGRATION=1 -e PGHOST=127.0.0.1
+          -e PGDATABASE=ledgerflow_batch_test -e PGUSER=ledgerflow -e PGPASSWORD=test_only
+          ledgerflow-batch-test -m pytest -q -p no:cacheprovider

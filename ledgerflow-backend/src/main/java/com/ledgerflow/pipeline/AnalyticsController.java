@@ -39,4 +39,36 @@ public class AnalyticsController {
             count("SELECT COUNT(*) FROM analytics.processed_events"));
     }
     private long count(String sql) { return jdbc.queryForObject(sql,Long.class); }
+    public record BatchDailySummary(LocalDate date,String currency,String operationType,long operations,
+        BigDecimal totalAmount,BigDecimal minAmount,BigDecimal maxAmount,java.util.UUID runId,Instant computedAt) {}
+    public record BatchRun(java.util.UUID runId,String status,LocalDate startDate,LocalDate endDate,
+        long sourceCount,long groupCount,Instant startedAt,Instant snapshotAt,Instant finishedAt,String errorType) {}
+    @GetMapping("/batch/daily")
+    public List<BatchDailySummary> batchDaily(
+        @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,
+        @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to) {
+        LocalDate end = to == null ? LocalDate.now(ZoneOffset.UTC) : to;
+        LocalDate start = from == null ? end.minusDays(6) : from;
+        if (end.isBefore(start) || ChronoUnit.DAYS.between(start,end) > 365)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Date range must be ordered and at most 366 days inclusive");
+        return jdbc.query("""
+            SELECT * FROM analytics.daily_operation_summary WHERE event_date BETWEEN ? AND ?
+            ORDER BY event_date,currency,operation_type
+            """,(rs,n) -> new BatchDailySummary(rs.getDate("event_date").toLocalDate(),rs.getString("currency"),
+                rs.getString("operation_type"),rs.getLong("operation_count"),rs.getBigDecimal("total_amount"),
+                rs.getBigDecimal("min_amount"),rs.getBigDecimal("max_amount"),rs.getObject("run_id",java.util.UUID.class),
+                rs.getTimestamp("computed_at").toInstant()),start,end);
+    }
+    @GetMapping("/batch/runs")
+    public List<BatchRun> batchRuns(@RequestParam(defaultValue="20") @jakarta.validation.constraints.Min(1)
+            @jakarta.validation.constraints.Max(100) int limit) {
+        return jdbc.query("""
+            SELECT * FROM analytics.batch_runs ORDER BY started_at DESC,run_id DESC LIMIT ?
+            """,(rs,n) -> new BatchRun(rs.getObject("run_id",java.util.UUID.class),rs.getString("status"),
+                rs.getDate("start_date").toLocalDate(),rs.getDate("end_date").toLocalDate(),
+                rs.getLong("source_count"),rs.getLong("group_count"),rs.getTimestamp("started_at").toInstant(),
+                rs.getTimestamp("snapshot_at") == null ? null : rs.getTimestamp("snapshot_at").toInstant(),
+                rs.getTimestamp("finished_at") == null ? null : rs.getTimestamp("finished_at").toInstant(),rs.getString("error_type")),limit);
+    }
+
 }

@@ -131,5 +131,6 @@ After the transfer example above, Bob now has 180.00 MAD. Both new operations
 return their original operation ID and date when retried with the same key/body.
 
 The [first data pipeline](data-pipeline.md) now captures these journal records
-through Outbox/Kafka and builds an analytical read model. Spark, Airflow, Power BI
-and security are later increments.
+through Outbox/Kafka and builds an analytical read model. A
+[daily PySpark batch](batch-pyspark.md) now publishes persistent summaries.
+Airflow, Power BI and security are later increments.

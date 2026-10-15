@@ -1,0 +1,14 @@
+services:
+  daily-batch:
+    profiles: [batch]
+    build: ./data-pipeline
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ledgerflow
+      PGUSER: ledgerflow
+      PGPASSWORD: ledgerflow_dev
+      SPARK_MASTER: local[2]
+    depends_on:
+      postgres:
+        condition: service_healthy

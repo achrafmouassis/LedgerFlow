@@ -14,11 +14,20 @@ flowchart LR
   K --> C[Validate and deduplicate]
   C --> F[Analytical transaction facts]
   F --> Q[Daily reporting API]
+  F --> S[Consistent batch snapshot]
+  S --> P[PySpark aggregation]
+  P --> T[Staging and atomic publication]
+  T --> M[Persistent daily summaries]
   C --> D[Dead-letter topic for invalid events]
 ```
 
 See [Pipeline contract and operations](../docs/data-pipeline.md) for the exact
 patterns, event format, failure behavior, startup instructions and tests.
 
-Spark/PySpark, Airflow and Power BI are subsequent stages; they are not required
-or implemented in this first ingestion stage.
+The second stage is now implemented in `ledgerflow_batch`: PySpark 4.1.0 reads a
+consistent snapshot of the facts, validates and aggregates by date/currency/type,
+and publishes daily summaries through staging and atomic range replacement.
+See [Daily PySpark batch](../docs/batch-pyspark.md) and the
+[complete French documentation](../docs/documentation-complete.md).
+
+Airflow orchestration and Power BI remain future stages.

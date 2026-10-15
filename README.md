@@ -1,5 +1,7 @@
 # LedgerFlow
 
+Documentation de rÃ©fÃ©rence en franÃ§ais : [guide complet](docs/documentation-complete.md) et [index docs](docs/README.md).
+
 LedgerFlow is a **Scalable Banking Transaction & Data Platform** designed to explore reliable backend engineering, transaction processing, data pipelines, and production-ready infrastructure.
 
 ## Project structure
@@ -64,7 +66,9 @@ GitHub Actions verifies the backend on H2 and PostgreSQL 18.
 The first data stage now implements a transactional Outbox, Kafka delivery,
 idempotent analytical ingestion and daily reporting. See
 [Data pipeline](docs/data-pipeline.md) for patterns, guarantees and tests.
-Spark/PySpark, Airflow, Power BI and authentication remain future work.
+Daily PySpark materialization now builds persistent summaries with a consistent source snapshot,
+staging reconciliation and atomic date-range replacement. See [Daily batch](docs/batch-pyspark.md).
+Airflow, Power BI and authentication remain future work.
 
 Run banking plus Kafka with:
 
@@ -75,5 +79,20 @@ docker compose -f compose.yaml -f compose.pipeline.yaml --profile app up --build
 - [x] Core banking domain as a modular monolith, with balanced journal.
 - [x] PostgreSQL persistence, Flyway migrations and automated tests.
 - [x] Transactional Outbox, Kafka and an idempotent analytical read model.
-- [ ] Spark/PySpark transformations and Airflow orchestration.
+- [x] Daily PySpark summaries, safe reruns, run history and integration tests.
+- [ ] Airflow orchestration and automated recovery.
 - [ ] Dimensional analytics, Power BI and expanded operational monitoring.
+
+## Daily PySpark batch
+
+Start the backend first so Flyway applies the schema, then run the optional batch
+(default: previous UTC day):
+
+```powershell
+docker compose -f compose.yaml -f compose.pipeline.yaml -f compose.batch.yaml --profile app up --build -d
+docker compose -f compose.yaml -f compose.batch.yaml --profile batch run --rm --build daily-batch
+```
+
+Use `--date YYYY-MM-DD` or `--from YYYY-MM-DD --to YYYY-MM-DD` for a rebuild.
+Read `/api/analytics/batch/daily` and `/api/analytics/batch/runs` for results and status.
+The batch is launched explicitly; Airflow scheduling is not implemented yet.
