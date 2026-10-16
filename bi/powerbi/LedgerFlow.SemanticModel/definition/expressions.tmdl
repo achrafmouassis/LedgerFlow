@@ -1,0 +1,3 @@
+expression Serveur = "localhost:5432" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+expression Base = "ledgerflow" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]

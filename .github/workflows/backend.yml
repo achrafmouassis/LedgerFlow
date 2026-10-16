@@ -80,3 +80,38 @@ jobs:
           -e BATCH_INTEGRATION=1 -e PGHOST=127.0.0.1
           -e PGDATABASE=ledgerflow_batch_test -e PGUSER=ledgerflow -e PGPASSWORD=test_only
           ledgerflow-batch-test -m pytest -q -p no:cacheprovider
+
+  operations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: ledgerflow_ops_test
+          POSTGRES_USER: ledgerflow
+          POSTGRES_PASSWORD: test_only
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U ledgerflow -d ledgerflow_ops_test"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r data-pipeline/requirements.txt
+      - name: Operational recovery and notification tests
+        run: python -m pytest data-pipeline/ops_tests -q
+        env:
+          PYTHONPATH: data-pipeline
+          OPS_INTEGRATION: '1'
+          PGHOST: localhost
+          PGDATABASE: ledgerflow_ops_test
+          PGUSER: ledgerflow
+          PGPASSWORD: test_only
+      - name: Validate complete Compose configuration
+        run: docker compose -f compose.yaml -f compose.pipeline.yaml -f compose.batch.yaml -f compose.ops.yaml --profile app config --quiet
+      - name: Validate native Power BI report schemas
+        run: |
+          pip install -r bi/powerbi/requirements-validation.txt
+          python scripts/check_powerbi.py --fetch-schemas

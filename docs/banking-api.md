@@ -133,4 +133,6 @@ return their original operation ID and date when retried with the same key/body.
 The [first data pipeline](data-pipeline.md) now captures these journal records
 through Outbox/Kafka and builds an analytical read model. A
 [daily PySpark batch](batch-pyspark.md) now publishes persistent summaries.
-Airflow, Power BI and security are later increments.
+Airflow and Grafana are optional operational components; see [Operations](operations.md).
+The native Power BI report is documented in [Power BI](power-bi.md).
+Banking security remains a later increment.

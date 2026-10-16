@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "name": "00000000000000000005",
+  "position": {
+    "x": 328,
+    "y": 130,
+    "width": 280,
+    "height": 120,
+    "z": 5,
+    "tabOrder": 5
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Montant total"
+                }
+              },
+              "queryRef": "Operations.Montant total",
+              "nativeQueryRef": "Montant total"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Montant total — devise choisie'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -51,7 +51,8 @@ docker compose -f compose.yaml -f compose.batch.yaml --profile batch run --rm da
 
 `--date` et `--from/--to` s'excluent. Une plage doit être ordonnée, complète et ne
 pas dépasser 366 jours inclusifs. Sans arguments, hier est déterminé en UTC.
-L'exécution est manuelle ; aucun cron ou DAG Airflow n'est encore installé.
+Ce CLI reste manuel. Le DAG Airflow optionnel automatise son exécution quotidienne ;
+voir [Exploitation](operations.md).
 
 Exemple de sortie, avec un UUID différent à chaque tentative :
 

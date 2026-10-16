@@ -30,4 +30,6 @@ and publishes daily summaries through staging and atomic range replacement.
 See [Daily PySpark batch](../docs/batch-pyspark.md) and the
 [complete French documentation](../docs/documentation-complete.md).
 
-Airflow orchestration and Power BI remain future stages.
+Optional Airflow orchestration, incident recovery, monitoring and Grafana dashboards
+are documented in [Operations](../docs/operations.md). The native Power BI project
+is documented in [Power BI](../docs/power-bi.md).

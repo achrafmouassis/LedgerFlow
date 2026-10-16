@@ -1,0 +1,19 @@
+apiVersion: 1
+datasources:
+  - name: LedgerFlow PostgreSQL
+    uid: ledgerflow-postgres
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    user: ledgerflow_dashboard
+    isDefault: true
+    editable: false
+    secureJsonData:
+      password: $DASHBOARD_DB_PASSWORD
+    jsonData:
+      database: ledgerflow
+      sslmode: disable
+      postgresVersion: 1800
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 300

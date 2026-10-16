@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "name": "00000000000000000006",
+  "position": {
+    "x": 632,
+    "y": 130,
+    "width": 280,
+    "height": 120,
+    "z": 6,
+    "tabOrder": 6
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Montant moyen"
+                }
+              },
+              "queryRef": "Operations.Montant moyen",
+              "nativeQueryRef": "Montant moyen"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Montant moyen par opération'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,165 @@
+# Local development platform. No Docker socket is mounted in Airflow.
+x-ops-env: &ops-env
+  PGHOST: postgres
+  PGPORT: 5432
+  PGDATABASE: ledgerflow
+  PGUSER: ledgerflow
+  PGPASSWORD: ledgerflow_dev
+  KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+  BATCH_WORKER_TOKEN: ${BATCH_WORKER_TOKEN:-ledgerflow-local-worker-token-change-me}
+
+services:
+  backend:
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, http://localhost:8080/actuator/health]
+      interval: 10s
+      timeout: 5s
+      retries: 24
+      start_period: 30s
+
+  batch-worker:
+    build: ./data-pipeline
+    entrypoint: [python3, -m, ledgerflow_ops, serve]
+    environment:
+      <<: *ops-env
+      SPARK_MASTER: local[2]
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python3, -c, "from urllib.request import urlopen; urlopen('http://localhost:8090/health', timeout=5)"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+    restart: unless-stopped
+    # Intentionally not published on the host.
+
+  monitor:
+    build: ./data-pipeline
+    entrypoint: [python3, -m, ledgerflow_ops, monitor]
+    environment:
+      <<: *ops-env
+      MONITOR_INTERVAL_SECONDS: ${MONITOR_INTERVAL_SECONDS:-30}
+      ALERT_PENDING_COUNT: ${ALERT_PENDING_COUNT:-100}
+      ALERT_PENDING_SECONDS: ${ALERT_PENDING_SECONDS:-120}
+      ALERT_UNPROCESSED_COUNT: ${ALERT_UNPROCESSED_COUNT:-100}
+      ALERT_KAFKA_LAG: ${ALERT_KAFKA_LAG:-100}
+      ABANDONED_RUN_SECONDS: ${ABANDONED_RUN_SECONDS:-7200}
+      BATCH_DEADLINE_UTC_HOUR: ${BATCH_DEADLINE_UTC_HOUR:-4}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      ALERT_EMAIL_FROM: ${ALERT_EMAIL_FROM:-ledgerflow@example.test}
+      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-operator@example.test}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+    depends_on:
+      backend:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
+
+  dashboard-init:
+    build: ./data-pipeline
+    entrypoint: [python3, -m, ledgerflow_ops, init-dashboard]
+    environment:
+      <<: *ops-env
+      DASHBOARD_DB_PASSWORD: ${DASHBOARD_DB_PASSWORD:-ledgerflow-dashboard-dev-password}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: on-failure
+
+  bi-init:
+    build: ./data-pipeline
+    entrypoint: [python3, -m, ledgerflow_ops, init-bi]
+    environment:
+      <<: *ops-env
+      BI_DB_PASSWORD: ${BI_DB_PASSWORD:-ledgerflow-bi-local-password}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: on-failure
+
+  grafana:
+    image: grafana/grafana:12.3.1
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-ledgerflow-local-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: ${SMTP_HOST:-mailpit}:${SMTP_PORT:-1025}
+      GF_SMTP_USER: ${SMTP_USERNAME:-}
+      GF_SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      GF_SMTP_FROM_ADDRESS: ${ALERT_EMAIL_FROM:-ledgerflow@example.test}
+      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-operator@example.test}
+      DASHBOARD_DB_PASSWORD: ${DASHBOARD_DB_PASSWORD:-ledgerflow-dashboard-dev-password}
+    volumes:
+      - ledgerflow-grafana-data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      dashboard-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:v1.27.0
+    ports: ["127.0.0.1:8025:8025"]
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 500
+    volumes:
+      - ledgerflow-mailpit-data:/data
+    restart: unless-stopped
+
+  airflow-db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:-airflow-local-dev-password}
+    volumes:
+      - ledgerflow-airflow-db:/var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  airflow:
+    image: apache/airflow:3.1.7-python3.12
+    command: standalone
+    ports: ["127.0.0.1:8081:8080"]
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD:-airflow-local-dev-password}@airflow-db/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__PARALLELISM: 2
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: admin:admin
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS_FILE: /opt/airflow/logs/admin-password.json
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow:8080/execution/
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:-ledgerflow-local-jwt-secret-for-development-only-change-before-deploy-2026}
+      BATCH_WORKER_URL: http://batch-worker:8090
+      BATCH_WORKER_TOKEN: ${BATCH_WORKER_TOKEN:-ledgerflow-local-worker-token-change-me}
+    volumes:
+      - ./infrastructure/airflow/dags:/opt/airflow/dags:ro
+      - ledgerflow-airflow-logs:/opt/airflow/logs
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+      batch-worker:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ledgerflow-grafana-data:
+  ledgerflow-mailpit-data:
+  ledgerflow-airflow-db:
+  ledgerflow-airflow-logs:

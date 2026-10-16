@@ -11,6 +11,10 @@ les flux streaming et batch, le modèle de données et les limites actuelles.
 | [Pipeline événementiel](data-pipeline.md) | Outbox, Kafka, consommation idempotente et reprise sur erreur |
 | [Batch quotidien PySpark](batch-pyspark.md) | Exécution, snapshot, staging, publication atomique et relance |
 | [Validation](validation.md) | Tests exécutés, scénarios et commandes reproductibles |
+| [Exploitation et graphiques](operations.md) | Airflow, alertes, reprise des incidents et Grafana |
+| [Power BI](power-bi.md) | Rapport natif, connexion PostgreSQL, chargement et limites de validation |
 
-Les fonctionnalités futures sont identifiées explicitement. Airflow, Power BI,
-l'authentification et un entrepôt dimensionnel ne sont pas encore implémentés.
+L'extension d'exploitation ajoute Airflow et Grafana. Le projet Power BI est
+disponible, avec chargement et rendu Desktop à vérifier. L'authentification
+bancaire et un entrepôt dimensionnel restent à développer. Le guide d'exploitation
+décrit cette extension ; la documentation complète décrit le socle initial.

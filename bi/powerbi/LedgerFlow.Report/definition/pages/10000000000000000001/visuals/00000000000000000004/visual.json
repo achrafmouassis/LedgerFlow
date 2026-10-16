@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "name": "00000000000000000004",
+  "position": {
+    "x": 24,
+    "y": 130,
+    "width": 280,
+    "height": 120,
+    "z": 4,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Nombre operations"
+                }
+              },
+              "queryRef": "Operations.Nombre operations",
+              "nativeQueryRef": "Nombre operations"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Nombre d’opérations'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

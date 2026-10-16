@@ -1,0 +1,392 @@
+{
+  "uid": "ledgerflow-operations",
+  "title": "LedgerFlow — surveillance et incidents",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "utc",
+  "refresh": "15s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "tags": [
+    "LedgerFlow"
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Messages en attente d’envoi",
+      "type": "timeseries",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT sampled_at AS time,pending AS value FROM analytics.monitor_samples WHERE $__timeFilter(sampled_at) ORDER BY 1",
+          "format": "time_series",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Retard de lecture Kafka",
+      "type": "timeseries",
+      "description": "Une interruption du graphique signifie que le retard est inconnu ; consulter les alertes.",
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT sampled_at AS time,NULLIF(kafka_lag,-1) AS value FROM analytics.monitor_samples WHERE $__timeFilter(sampled_at) ORDER BY 1",
+          "format": "time_series",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Publiés mais non intégrés",
+      "type": "timeseries",
+      "description": "",
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT sampled_at AS time,unprocessed AS value FROM analytics.monitor_samples WHERE $__timeFilter(sampled_at) ORDER BY 1",
+          "format": "time_series",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Âge du dernier contrôle (secondes)",
+      "type": "stat",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT EXTRACT(EPOCH FROM clock_timestamp()-MAX(sampled_at)) AS value FROM analytics.monitor_samples",
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "noValue": "Aucune mesure"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Messages rejetés non résolus",
+      "type": "stat",
+      "description": "",
+      "gridPos": {
+        "x": 8,
+        "y": 8,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT open_dead_letters AS value FROM analytics.monitor_samples ORDER BY sampled_at DESC LIMIT 1",
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "noValue": "Aucune mesure"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Batchs échoués sur 24 h",
+      "type": "stat",
+      "description": "",
+      "gridPos": {
+        "x": 16,
+        "y": 8,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT failed_batches AS value FROM analytics.monitor_samples ORDER BY sampled_at DESC LIMIT 1",
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "noValue": "Aucune mesure"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Alertes — état et envoi des notifications",
+      "type": "table",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 24,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT alert_key AS \"Contrôle\",active AS \"En alerte\",message AS \"Description\",changed_at AS \"Depuis\",notified_at AS \"Notification envoyée\" FROM analytics.alerts ORDER BY active DESC,changed_at DESC",
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      }
+    },
+    {
+      "id": 8,
+      "title": "Messages rejetés — identifiants pour le rejeu",
+      "type": "table",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 24,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT id AS \"Identifiant\",status AS \"État\",topic AS \"Topic\",captured_at AS \"Reçu à\",replay_count AS \"Tentatives\",resolved_at AS \"Résolu à\" FROM analytics.dead_letter_overview ORDER BY captured_at DESC LIMIT 100",
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      }
+    }
+  ]
+}

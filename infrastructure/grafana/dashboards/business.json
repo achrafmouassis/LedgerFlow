@@ -1,0 +1,196 @@
+{
+  "uid": "ledgerflow-business",
+  "title": "LedgerFlow — activité bancaire",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "utc",
+  "refresh": "30s",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "tags": [
+    "LedgerFlow"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "currency",
+        "label": "Devise",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "ledgerflow-postgres"
+        },
+        "definition": "SELECT DISTINCT currency FROM analytics.daily_operation_summary ORDER BY 1",
+        "query": "SELECT DISTINCT currency FROM analytics.daily_operation_summary ORDER BY 1",
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "EUR",
+          "value": "EUR"
+        },
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Nombre d’opérations par jour",
+      "type": "timeseries",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT event_date::timestamp AS time, operation_type AS metric, SUM(operation_count)::double precision AS value FROM analytics.daily_operation_summary WHERE event_date BETWEEN ($__timeFrom() AT TIME ZONE 'UTC')::date AND ($__timeTo() AT TIME ZONE 'UTC')::date AND currency = ${currency:sqlstring} GROUP BY event_date,operation_type ORDER BY 1",
+          "format": "time_series",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Montants par jour — devise sélectionnée",
+      "type": "timeseries",
+      "description": "Volume des mouvements, pas bénéfice bancaire. Aucune conversion entre devises.",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT event_date::timestamp AS time, operation_type AS metric, SUM(total_amount)::double precision AS value FROM analytics.daily_operation_summary WHERE event_date BETWEEN ($__timeFrom() AT TIME ZONE 'UTC')::date AND ($__timeTo() AT TIME ZONE 'UTC')::date AND currency = ${currency:sqlstring} GROUP BY event_date,operation_type ORDER BY 1",
+          "format": "time_series",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Statistiques publiées",
+      "type": "table",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT event_date AS \"Date UTC\",currency AS \"Devise\",operation_type AS \"Opération\",operation_count AS \"Nombre\",total_amount AS \"Total\",min_amount AS \"Minimum\",max_amount AS \"Maximum\",computed_at AS \"Calculé à\",run_id AS \"Exécution\" FROM analytics.daily_operation_summary WHERE event_date BETWEEN ($__timeFrom() AT TIME ZONE 'UTC')::date AND ($__timeTo() AT TIME ZONE 'UTC')::date AND currency = ${currency:sqlstring} ORDER BY event_date DESC,operation_type",
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      }
+    },
+    {
+      "id": 4,
+      "title": "Historique des calculs",
+      "type": "table",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ledgerflow-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ledgerflow-postgres"
+          },
+          "rawSql": "SELECT started_at AS \"Démarrage\",status AS \"État\",start_date AS \"Du\",end_date AS \"Au\",source_count AS \"Opérations lues\",group_count AS \"Groupes\",error_type AS \"Erreur\" FROM analytics.batch_runs ORDER BY started_at DESC LIMIT 50",
+          "format": "table",
+          "editorMode": "code",
+          "rawQuery": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      }
+    }
+  ]
+}

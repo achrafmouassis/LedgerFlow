@@ -1,0 +1,93 @@
+table Operations
+
+	measure 'Nombre operations' = COALESCE(SUM(Operations[Nombre]), 0)
+		formatString: #,0
+
+	measure 'Montant total' = IF(HASONEVALUE(Operations[Devise]), SUM(Operations[Montant]), BLANK())
+		formatString: #,0.00
+
+	measure 'Montant moyen' = DIVIDE([Montant total], [Nombre operations])
+		formatString: #,0.00
+
+	measure 'Montant minimum' = IF(HASONEVALUE(Operations[Devise]), MIN(Operations[Minimum]), BLANK())
+		formatString: #,0.00
+
+	measure 'Montant maximum' = IF(HASONEVALUE(Operations[Devise]), MAX(Operations[Maximum]), BLANK())
+		formatString: #,0.00
+
+	measure 'Devise selectionnee' = SELECTEDVALUE(Operations[Devise], "Choisir une seule devise pour les montants")
+
+	measure 'Derniere publication' = MAX(Operations[Publication])
+		formatString: dd/MM/yyyy HH:mm
+
+	column Date
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		summarizeBy: none
+		sourceColumn: event_date
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Devise
+		dataType: string
+		summarizeBy: none
+		sourceColumn: currency
+
+	column Type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: operation_label
+
+	column 'Code operation'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: operation_type
+
+	column Nombre
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: operation_count
+
+	column Montant
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: total_amount
+
+	column Minimum
+		dataType: double
+		isHidden
+		summarizeBy: min
+		sourceColumn: min_amount
+
+	column Maximum
+		dataType: double
+		isHidden
+		summarizeBy: max
+		sourceColumn: max_amount
+
+	column 'Total exact SQL'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: total_amount_exact
+
+	column Publication
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: computed_at
+
+	column Execution
+		dataType: string
+		summarizeBy: none
+		sourceColumn: run_id
+
+	partition Operations = m
+		mode: import
+		source =
+			let
+			    Source = PostgreSQL.Database(Serveur, Base, [CreateNavigationProperties=false]),
+			    Data = Source{[Schema="analytics", Item="bi_daily_operations"]}[Data],
+			    UTC = Table.TransformColumns(Data, {{"computed_at", each if _ = null then null else DateTimeZone.RemoveZone(DateTimeZone.ToUtc(DateTimeZone.From(_))), type datetime}})
+			in
+			    UTC

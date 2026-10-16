@@ -8,6 +8,8 @@ RUN chmod 644 /opt/drivers/postgresql.jar
 ENV PYTHONPATH=/opt/ledgerflow:/opt/batch-deps:/opt/spark/python     JDBC_DRIVER_JAR=/opt/drivers/postgresql.jar     PYSPARK_PYTHON=python3     SPARK_LOCAL_IP=127.0.0.1
 WORKDIR /opt/ledgerflow
 COPY ledgerflow_batch ./ledgerflow_batch
+COPY ledgerflow_ops ./ledgerflow_ops
 COPY tests ./tests
+COPY ops_tests ./ops_tests
 USER spark
 ENTRYPOINT ["python3", "-m", "ledgerflow_batch"]

@@ -1,0 +1,157 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "name": "0000000000000000000a",
+  "position": {
+    "x": 24,
+    "y": 650,
+    "width": 1232,
+    "height": 220,
+    "z": 10,
+    "tabOrder": 10
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Date"
+                }
+              },
+              "queryRef": "Operations.Date",
+              "nativeQueryRef": "Date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Devise"
+                }
+              },
+              "queryRef": "Operations.Devise",
+              "nativeQueryRef": "Devise"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Type"
+                }
+              },
+              "queryRef": "Operations.Type",
+              "nativeQueryRef": "Type"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Nombre operations"
+                }
+              },
+              "queryRef": "Operations.Nombre operations",
+              "nativeQueryRef": "Nombre operations"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Montant total"
+                }
+              },
+              "queryRef": "Operations.Montant total",
+              "nativeQueryRef": "Montant total"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Montant minimum"
+                }
+              },
+              "queryRef": "Operations.Montant minimum",
+              "nativeQueryRef": "Montant minimum"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Montant maximum"
+                }
+              },
+              "queryRef": "Operations.Montant maximum",
+              "nativeQueryRef": "Montant maximum"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Total exact SQL"
+                }
+              },
+              "queryRef": "Operations.Total exact SQL",
+              "nativeQueryRef": "Total exact SQL"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Synthèses publiées — détail par jour et devise'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

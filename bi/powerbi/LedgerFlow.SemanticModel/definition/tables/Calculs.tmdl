@@ -1,0 +1,64 @@
+table Calculs
+
+	column Execution
+		dataType: string
+		summarizeBy: none
+		sourceColumn: run_id
+
+	column Etat
+		dataType: string
+		summarizeBy: none
+		sourceColumn: status
+
+	column Debut
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		summarizeBy: none
+		sourceColumn: start_date
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Fin
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		summarizeBy: none
+		sourceColumn: end_date
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Demarrage
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		summarizeBy: none
+		sourceColumn: started_at
+
+	column Termine
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		summarizeBy: none
+		sourceColumn: finished_at
+
+	column 'Operations lues'
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: source_count
+
+	column Groupes
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: group_count
+
+	column Erreur
+		dataType: string
+		summarizeBy: none
+		sourceColumn: error_type
+
+	partition Calculs = m
+		mode: import
+		source =
+			let
+			    Source = PostgreSQL.Database(Serveur, Base, [CreateNavigationProperties=false]),
+			    Data = Source{[Schema="analytics", Item="bi_batch_runs"]}[Data],
+			    UTC = Table.TransformColumns(Data, {
+			        {"started_at", each if _ = null then null else DateTimeZone.RemoveZone(DateTimeZone.ToUtc(DateTimeZone.From(_))), type datetime},
+			        {"finished_at", each if _ = null then null else DateTimeZone.RemoveZone(DateTimeZone.ToUtc(DateTimeZone.From(_))), type datetime}})
+			in
+			    UTC

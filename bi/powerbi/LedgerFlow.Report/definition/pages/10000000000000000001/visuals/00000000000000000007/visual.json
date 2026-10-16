@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "name": "00000000000000000007",
+  "position": {
+    "x": 936,
+    "y": 130,
+    "width": 320,
+    "height": 120,
+    "z": 7,
+    "tabOrder": 7
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Devise selectionnee"
+                }
+              },
+              "queryRef": "Operations.Devise selectionnee",
+              "nativeQueryRef": "Devise selectionnee"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Devise des montants'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

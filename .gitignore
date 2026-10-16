@@ -9,3 +9,8 @@ batch-smoke.log
 __pycache__/
 .pytest_cache/
 *.pyc
+.work/
+.env.ops
+**/.pbi/
+**/*.pbix
+**/*.pbit

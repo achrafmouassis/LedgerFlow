@@ -81,3 +81,20 @@ aprÃ¨s son exÃ©cution dans cette section.
 Ces vÃ©rifications ne constituent pas des tests de charge, une certification
 bancaire ou une dÃ©monstration de haute disponibilitÃ©. Airflow, Power BI et la
 sÃ©curitÃ© ne sont pas inclus, puisqu'ils ne sont pas encore dÃ©veloppÃ©s.
+# Extension du 16 octobre 2026
+
+La validation d'Airflow, Grafana, des alertes et de la reprise est detaillee dans
+[operations-validation.md](operations-validation.md) : 85 cas distincts reussis.
+La campagne du 15 octobre ci-dessus est conservee comme historique.
+
+## Integration Power BI du 16 octobre
+
+La migration V6 et les vues BI ont ete verifiees sur H2 et PostgreSQL.
+La suite backend sans broker donne 43 reussites et 3 tests Kafka ignores ;
+la suite operationnelle donne 13 reussites, avec le test Kafka isole non relance.
+Le lecteur TMDL officiel Microsoft lit les deux tables et deux parametres ;
+20 fichiers PBIP/PBIR/JSON et 31 references de champs sont valides. Les 13 visuels
+respectent les dimensions de leurs pages. Le test BI verifie les devises,
+les montants exacts SQL et les droits de lecture limites aux deux vues.
+L'ouverture, l'import et le rendu dans Power BI Desktop restent a verifier ;
+voir [Power BI](power-bi.md). Ces controles ne sont pas un test du moteur DAX.

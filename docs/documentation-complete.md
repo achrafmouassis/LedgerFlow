@@ -5,6 +5,13 @@ qui simule un backend bancaire fiable et transforme ses opÃ©rations en donnÃ�
 analytiques. Cette documentation dÃ©crit le code prÃ©sent, ses garanties et ses
 limites ; elle ne prÃ©sente pas les Ã©lÃ©ments de la feuille de route comme acquis.
 
+> Extension du 16 octobre 2026 : Airflow, alertes, reprise des incidents et
+> Grafana sont maintenant decrits dans [Exploitation](operations.md). Les mentions
+> de ces fonctions comme futures ci-dessous concernent le socle du 15 octobre.
+> La migration V5 ajoute leurs tables operationnelles.
+> Power BI : le [projet natif et son guide](power-bi.md) ajoutent les vues V6,
+> le modele et le rapport ; l'ouverture et le rendu Desktop restent a verifier.
+
 ## 1. Technologies, techniques et choix de conception
 
 ### 1.1 Technologies effectivement utilisÃ©es
