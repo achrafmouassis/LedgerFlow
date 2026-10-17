@@ -6,6 +6,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/ledgerflow
       DB_USERNAME: ledgerflow
       DB_PASSWORD: ledgerflow_dev
+      LEDGERFLOW_ADMIN_PASSWORD: ${LEDGERFLOW_ADMIN_PASSWORD:-}
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:

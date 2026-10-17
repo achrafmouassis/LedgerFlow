@@ -1,8 +1,19 @@
 # LedgerFlow
 
-Documentation de rÃ©fÃ©rence en franÃ§ais : [guide complet](docs/documentation-complete.md) et [index docs](docs/README.md).
+Interface bancaire locale : **http://localhost:8080/**. Connexion, rôles et
+permissions : [guide sécurité et interface](docs/security-and-interface.md).
+Les mots de passe sont dans le fichier local ignoré `.work/local-access.json`.
+Avant un premier démarrage : `python scripts/init_local_auth.py`, puis
+`.\scripts\platform.ps1 up -d --build`. Ne jamais publier les identifiants.
+Pour savoir ce qui est déjà validé et ce qui reste à faire, voir
+[l'état actuel du projet](docs/etat-actuel.md).
 
-LedgerFlow is a **Scalable Banking Transaction & Data Platform** designed to explore reliable backend engineering, transaction processing, data pipelines, and production-ready infrastructure.
+Campagne de tests avec données fictives, charge et incidents : voir
+[le guide QA](docs/qa.md). Lancement PowerShell : `.\scripts\qa.ps1`.
+
+Documentation de référence en français : [guide complet](docs/documentation-complete.md) et [index docs](docs/README.md).
+
+LedgerFlow is a **banking transaction and data platform demonstration** designed to explore reliable backend engineering, transaction processing, and data pipelines. Current load-test results and deployment limits are documented in [the project status](docs/etat-actuel.md).
 
 ## Project structure
 
@@ -26,15 +37,20 @@ ledgerflow/
 
 ## Getting started
 
-For an entirely Docker-based launch, run `docker compose --profile app up --build -d`.
-The API is then available at `http://localhost:8080`. Alternatively, use the local
-Java development workflow below.
+For the full local platform, initialize local credentials as above, then run `.\scripts\platform.ps1 up -d --build`.
+The API is then available at `http://localhost:8080`. For a standalone Java
+development run, start PostgreSQL and provide the same database settings plus
+`LEDGERFLOW_ADMIN_PASSWORD` (at least 16 characters) before starting Spring Boot.
 
 From the repository root:
 
 ```powershell
 docker compose up -d
 cd ledgerflow-backend
+$env:DB_URL = "jdbc:postgresql://localhost:5432/ledgerflow"
+$env:DB_USERNAME = "ledgerflow"
+$env:DB_PASSWORD = "ledgerflow_dev"
+$env:LEDGERFLOW_ADMIN_PASSWORD = "replace-with-a-long-local-password"
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -71,7 +87,7 @@ staging reconciliation and atomic date-range replacement. See [Daily batch](docs
 Optional Airflow scheduling, operational recovery, email alerts and Grafana
 dashboards are available; see [Operations](docs/operations.md).
 A native Power BI project is available in [bi/powerbi](bi/powerbi/README.md).
-Banking authentication remains future work.
+Banking authentication, roles and explicit account grants are implemented; see [security and interface](docs/security-and-interface.md). This remains a local demonstration, not a production banking deployment.
 
 Run banking plus Kafka with:
 

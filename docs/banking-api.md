@@ -1,8 +1,10 @@
 # Banking API
 
 This educational API simulates accounts and same-currency transfers. Opening
-balances are simulation funds. Authentication and account ownership checks are
-not implemented yet: run locally, never expose it publicly or use real funds.
+balances are simulation funds. Authentication, roles and explicit account grants
+are now required: see [Security and interface](security-and-interface.md).
+For the HTTP examples below, add `Authorization: Bearer <token>` after login.
+Run locally; never use real funds or treat this demonstration as production-ready.
 The journal records balanced debit/credit pairs for opening funds, deposits,
 withdrawals and transfers. Account balances are a projection of the customer
 credit postings minus customer debit postings.

@@ -18,6 +18,7 @@ import static com.ledgerflow.banking.BankingApi.*;
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
+@org.springframework.security.test.context.support.WithMockUser(roles="OPERATOR")
 class BankingIntegrationTests {
     @Autowired BankingService service;
     @Autowired MockMvc mvc;

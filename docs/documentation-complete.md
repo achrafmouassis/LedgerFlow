@@ -9,6 +9,10 @@ limites ; elle ne prÃ©sente pas les Ã©lÃ©ments de la feuille de route comm
 > Grafana sont maintenant decrits dans [Exploitation](operations.md). Les mentions
 > de ces fonctions comme futures ci-dessous concernent le socle du 15 octobre.
 > La migration V5 ajoute leurs tables operationnelles.
+> Extension du 17 octobre : interface locale, authentification et permissions
+> explicites sont documentees dans [Securite et interface](security-and-interface.md).
+> La migration V7 ajoute les utilisateurs, sessions et attributions de comptes.
+> Les mentions d'absence d'interface ou d'authentification plus bas sont historiques.
 > Power BI : le [projet natif et son guide](power-bi.md) ajoutent les vues V6,
 > le modele et le rapport ; l'ouverture et le rendu Desktop restent a verifier.
 

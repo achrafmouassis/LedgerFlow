@@ -1,0 +1,17 @@
+# Main application demonstration only. Do not combine this with compose.qa.yaml.
+services:
+  demo-data:
+    profiles: [demo]
+    build: ./data-pipeline
+    user: "0:0"
+    entrypoint: [python3, /demo/demo_data.py]
+    environment:
+      PGHOST: postgres
+      PGDATABASE: ledgerflow
+      PGUSER: ledgerflow
+      PGPASSWORD: ledgerflow_dev
+      SPARK_MASTER: local[2]
+      LEDGERFLOW_ADMIN_PASSWORD: ${LEDGERFLOW_ADMIN_PASSWORD:-}
+    volumes:
+      - ./scripts:/demo:ro
+      - ./.work/demo-data:/reports

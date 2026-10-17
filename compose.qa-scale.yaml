@@ -1,0 +1,14 @@
+# Only combine with compose.qa.yaml, project ledgerflow-qa.
+services:
+  backend:
+    ports: !reset []
+    cpus: 1.0
+    mem_limit: 768m
+  gateway:
+    image: nginx:1.28-alpine
+    ports: ["127.0.0.1:18081:8080"]
+    volumes:
+      - ./infrastructure/qa/nginx.conf:/etc/nginx/nginx.conf:ro
+  qa:
+    environment:
+      QA_API_BASE: http://gateway:8080/api

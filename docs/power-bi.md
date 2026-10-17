@@ -120,10 +120,11 @@ ajouter ensuite une demande d'actualisation via l'API Power BI après publicatio
 - Un test PostgreSQL vérifie les agrégats multidevises, le texte décimal exact,
   l'accès aux vues et le refus de lecture des comptes et d'écriture.
 
-Ces vérifications ne remplacent pas l'ouverture, le chargement des données et
-le contrôle du rendu dans Desktop. Power BI Desktop n'a pas été trouvé dans
-les emplacements usuels du poste lors de cette intégration ; aucune ouverture
-native ni publication cloud n'est donc annoncée comme validée.
+Ces vérifications ne remplacent pas le chargement des données et le contrôle du
+rendu dans Desktop. Power BI Desktop a depuis été ouvert sur le poste. Lors de
+l'actualisation, il a demandé les identifiants PostgreSQL ; la réussite du
+chargement et les filtres restent à confirmer. Aucune publication cloud n'a
+été effectuée.
 
 Validation reproductible des fichiers :
 

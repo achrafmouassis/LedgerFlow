@@ -111,7 +111,38 @@ jobs:
           PGPASSWORD: test_only
       - name: Validate complete Compose configuration
         run: docker compose -f compose.yaml -f compose.pipeline.yaml -f compose.batch.yaml -f compose.ops.yaml --profile app config --quiet
+      - name: Validate isolated QA configuration and runner safety
+        run: |
+          docker compose -p ledgerflow-qa -f compose.qa.yaml config --quiet
+          docker compose -p ledgerflow-qa -f compose.qa.yaml -f compose.qa-scale.yaml config --quiet
+          PYTHONPATH=data-pipeline python -m unittest discover -s qa -p 'test_*.py'
       - name: Validate native Power BI report schemas
         run: |
           pip install -r bi/powerbi/requirements-validation.txt
           python scripts/check_powerbi.py --fetch-schemas
+
+  qa-end-to-end:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start isolated QA platform
+        run: docker compose -p ledgerflow-qa -f compose.qa.yaml up -d --build --wait --wait-timeout 300 postgres kafka backend
+      - name: Build generator
+        run: docker compose -p ledgerflow-qa -f compose.qa.yaml build qa
+      - name: Banking, load, pipeline and Spark reconciliation
+        run: docker compose -p ledgerflow-qa -f compose.qa.yaml run --rm --no-deps qa --operations 30 --concurrency 1,4 --p95-ms 5000
+      - name: Upload synthetic QA reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ledgerflow-qa-reports
+          path: .work/qa/
+          include-hidden-files: true
+          if-no-files-found: warn
+      - name: QA logs
+        if: failure()
+        run: docker compose -p ledgerflow-qa -f compose.qa.yaml logs --tail 150 backend kafka
+      - name: Stop isolated QA platform
+        if: always()
+        run: docker compose -p ledgerflow-qa -f compose.qa.yaml stop

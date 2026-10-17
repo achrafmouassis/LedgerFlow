@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
+@org.springframework.security.test.context.support.WithMockUser(roles="OPERATOR")
 class PipelineIntegrationTests {
     @Autowired BankingService banking;
     @Autowired OutboxCapture capture;

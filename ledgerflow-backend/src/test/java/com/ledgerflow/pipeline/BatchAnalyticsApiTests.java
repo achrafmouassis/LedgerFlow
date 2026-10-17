@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@org.springframework.security.test.context.support.WithMockUser(roles="OPERATOR")
 class BatchAnalyticsApiTests {
     @Autowired JdbcTemplate jdbc;
     @Autowired MockMvc mvc;
