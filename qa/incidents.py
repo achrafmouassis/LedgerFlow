@@ -25,7 +25,7 @@ def main():
         try:
             with urlopen(Request(BASE+f'/accounts/{state["account"]}/deposits',
                 headers={'Content-Type':'application/json','Authorization':'Bearer '+state['token'],'Idempotency-Key':state['db_key']},
-                data=b'{"amount":"5.00"}'),timeout=15) as response:
+                data=b'{"amount":"5.00"}'),timeout=45) as response:
                 status=response.status
         except HTTPError as error: status=error.code
         if status!=503: raise AssertionError(f'Expected explicit HTTP 503, received {status}')

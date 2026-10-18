@@ -98,3 +98,13 @@ respectent les dimensions de leurs pages. Le test BI verifie les devises,
 les montants exacts SQL et les droits de lecture limites aux deux vues.
 L'ouverture, l'import et le rendu dans Power BI Desktop restent a verifier ;
 voir [Power BI](power-bi.md). Ces controles ne sont pas un test du moteur DAX.
+
+## Extension du 18 octobre 2026
+
+La derniere version du backend a ete relancee dans un conteneur Java 21 contre
+un vrai PostgreSQL 18 et le broker Kafka 4.1.2 de l'environnement QA. Une base
+separee `ledgerflow_java_test` a recu les sept migrations Flyway. Resultat :
+**53 tests reussis, aucun echec et aucun test ignore**. Cela inclut les tests
+Kafka conditionnels, la securite de l'API, l'idempotence, l'Outbox, la DLT et les
+lectures analytiques. Les mesures de charge actualisees sont detaillees dans
+[Tests multi-instances et incidents](scalability-and-incidents.md).

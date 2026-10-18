@@ -3,6 +3,7 @@ Measures intended-arrival latency as well as HTTP latency: slower emission is
 not silently treated as lower offered load. Reports dropped arrivals as failure.
 """
 import argparse
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -23,6 +24,9 @@ def main():
         parser.error('seconds 10..3600; rate 1..500')
     campaign=Campaign(argparse.Namespace(phase=f'scale-{args.replicas}',skip_batch=True,p95_ms=2000,drain_seconds=600))
     campaign.load_model='open-arrival scheduling with bounded outstanding requests; generator drops are failures'
+    # Keep load-generator filesystem I/O out of the per-response hot path.
+    # Flush at 256 records and at report creation; memory stays bounded.
+    campaign.buffered_requests=[]
     try:
         # Verify a single session is accepted by every replica through the gateway.
         instances=set()
@@ -31,6 +35,7 @@ def main():
                 instances.add(json.load(response)['instance'])
         campaign.check('Gateway distributes one authenticated session across expected instances',len(instances)==args.replicas,sorted(instances))
         accounts=[campaign.account(('MAD','EUR','USD')[i%3], '10000') for i in range(48)]
+        pending_before=campaign.scalar('SELECT count(*) FROM outbox_events WHERE published_at IS NULL')
         campaign.group=f'open-arrival-{args.replicas}'
         total=args.seconds*args.rate
         pending,completed,dropped=[],[],0
@@ -60,6 +65,8 @@ def main():
                     completed=len(completed),dropped_arrivals=dropped,unexpected_errors=errors,
                     achieved_rps=len(completed)/elapsed,p95_http_ms=percentile([r['elapsed_ms'] for _,r in completed],.95),
                     p95_arrival_ms=percentile([r['arrival_ms'] for _,r in completed],.95),instances=sorted(instances),
+                    upstream_counts=dict(Counter(r['upstream'] for _,r in completed if r.get('upstream'))),
+                    pending_outbox_before_load=pending_before,
                     note='Same local Docker host; one CPU and 768 MiB per backend; shared PostgreSQL and one Kafka broker.')
         (campaign.directory/'scalability.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
         campaign.stages.append(dict(concurrency=64,requests=len(completed),errors=errors,seconds=elapsed,
@@ -68,7 +75,11 @@ def main():
         campaign.check('No dropped arrivals',dropped==0,result)
         campaign.check('No unexpected HTTP error',errors==0,result)
         campaign.check('Arrival-to-response p95 under 2s',result['p95_arrival_ms']<=2000,result)
+        result['pending_outbox_at_load_end']=campaign.scalar('SELECT count(*) FROM outbox_events WHERE published_at IS NULL')
+        drain_start=time.perf_counter()
         campaign.reconcile()
+        result['reconcile_seconds']=round(time.perf_counter()-drain_start,3)
+        (campaign.directory/'scalability.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
         print(json.dumps(result),flush=True)
     except Exception as error:
         campaign.check('Load completed without exception',False,type(error).__name__)

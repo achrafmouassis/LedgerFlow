@@ -11,6 +11,33 @@ Les données principales ne servent pas de cible de panne ou de charge.
 .\scripts\qa-scalability.ps1 -Seconds 60 -Rate 40
 ```
 
+Après une première construction, `-SkipBuild` évite de recompilier entre des
+essais comparables. Le paramètre `-ReplicaOrder 3,2,1` permet de refaire la
+campagne dans l'ordre inverse. PostgreSQL et Kafka sont démarrés une seule fois ;
+seul le nombre d'instances backend change entre les mesures.
+
+Le 18 octobre 2026, deux campagnes stabilisées ont donné, pour 2 400 arrivées
+proposées par essai :
+
+| Backends | Terminées | Erreurs/pertes | Débit | p95 passage 1 / passage 2 | Vidage pipeline |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 2 400 | 0 | 40,01/s | 132 ms / 234 ms | 133 s / 102 s |
+| 2 | 2 400 | 0 | 40,00/s | 367 ms / 391 ms | 32 s / 47 s |
+| 3 | 2 400 | 0 | 39,99/s | 537 ms / 471 ms | 40 s / 44 s |
+
+Tous les critères ont réussi dans les deux ordres. Nginx a distribué exactement
+1 200/1 200 demandes avec deux instances et 800/800/800 avec trois. Les comptes,
+journaux, événements et faits ont été rapprochés. Les rapports sont dans
+`.work/qa/20261018T163612-f7465ed4/` à
+`.work/qa/20261018T165016-9f994d59/`.
+
+Un passage à froid antérieur a échoué : PostgreSQL était recréé pendant le
+changement d'échelle, ce qui mélangeait démarrage des dépendances et mesure du
+backend. Ce résultat reste utile : la reprise à froid n'offre pas les mêmes
+garanties que le régime stabilisé. Les mesures ci-dessus prouvent 40 demandes/s
+pendant 60 secondes sur cette machine, pas une capacité maximale ni un gain
+horizontal. L'instance unique obtient même la latence HTTP la plus faible.
+
 Trois essais successifs, débit d'arrivée imposé, 1 CPU et 768 Mio par instance,
 heap Java fixé à 384 Mio. Nginx répartit les demandes sans affinité de session.
 Le test vérifie qu'un même token est accepté par tous les noms d'instances attendus.
@@ -25,7 +52,9 @@ ralentissement ne se transforme donc pas silencieusement en débit plus faible.
 
 Rapports par essai dans `.work/qa/<run>/scalability.json` et `report.html` : débit
 proposé/réalisé, arrivées non émises, erreurs HTTP, p95 HTTP et p95 depuis arrivée.
-Après la charge, rapprochement des soldes, journaux, événements et statistiques.
+Le fichier indique aussi la répartition par instance, le nombre d'événements
+Outbox encore en attente à la fin de la charge et le temps de vidage. Après la
+charge, rapprochement des soldes, journaux, événements et statistiques.
 Les assertions de charge échouées restent visibles ; le script tente quand même
 les configurations suivantes. Les erreurs d'infrastructure arrêtent la campagne.
 
@@ -41,6 +70,13 @@ utiliser un générateur séparé, répéter trois fois et comparer les mêmes p
 ```powershell
 .\scripts\qa-incidents.ps1
 ```
+
+Campagne exécutée le 17 octobre 2026 : script terminé avec succès, six rapports
+contenant 33 contrôles `PASS` et sonde d'indisponibilité SQL à HTTP 503 `PASS`.
+Les rapports locaux vont de `.work/qa/20261017T214404-7bc291d4/` à
+`.work/qa/20261017T214709-c14e3346/` ; la réponse de la sonde SQL est dans
+`.work/qa/db-outage-result.json`. Les services backend et PostgreSQL QA étaient
+de nouveau sains après la campagne.
 
 - Dépôt validé, SIGKILL du backend QA, redémarrage puis même demande : même
   opération et un seul effet financier. Ce test est après commit confirmé ; il

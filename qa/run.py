@@ -60,11 +60,14 @@ class Campaign:
             headers['Idempotency-Key'] = key
         data = json.dumps(payload).encode() if payload is not None else None
         start = time.perf_counter()
+        upstream = None
         try:
             with urlopen(Request(BASE + path, data=data, headers=headers, method=method), timeout=20) as response:
                 status, body = response.status, response.read().decode()
+                upstream = response.headers.get('X-QA-Upstream')
         except HTTPError as error:
             status, body = error.code, error.read().decode()
+            upstream = error.headers.get('X-QA-Upstream')
         except (URLError, TimeoutError, OSError) as error:
             status, body = 0, type(error).__name__
         elapsed = (time.perf_counter() - start) * 1000
@@ -74,11 +77,25 @@ class Campaign:
             result = {'raw': body[:500]}
         record = dict(at=datetime.now(timezone.utc).isoformat(), group=getattr(self, 'group', 'functional'),
                       method=method, path=path, key=key, payload=payload, status=status,
-                      elapsed_ms=elapsed, response=result)
+                      elapsed_ms=elapsed, response=result, upstream=upstream)
         if not sensitive:
-            with self.lock, (self.directory / 'requests.jsonl').open('a', encoding='utf-8') as stream:
-                stream.write(json.dumps(record, default=str) + '\n')
+            line = json.dumps(record, default=str) + '\n'
+            with self.lock:
+                if hasattr(self, 'buffered_requests'):
+                    self.buffered_requests.append(line)
+                    if len(self.buffered_requests) >= 256:
+                        self.flush_requests()
+                else:
+                    with (self.directory / 'requests.jsonl').open('a', encoding='utf-8') as stream:
+                        stream.write(line)
         return record
+
+    def flush_requests(self):
+        if not getattr(self, 'buffered_requests', None):
+            return
+        with (self.directory / 'requests.jsonl').open('a', encoding='utf-8') as stream:
+            stream.writelines(self.buffered_requests)
+        self.buffered_requests.clear()
 
     def account(self, currency='MAD', balance='0'):
         names = ['Amine Demo', 'Sara Demo', 'Epicerie Demo', 'Loyer Demo', 'Entreprise Demo']
@@ -274,6 +291,9 @@ class Campaign:
                    self.scalar('SELECT balance FROM accounts WHERE id=%s', (probe['account'],)) == Decimal('123.45'))
 
     def report(self):
+        if hasattr(self, 'buffered_requests'):
+            with self.lock:
+                self.flush_requests()
         result = dict(run_id=self.run_id, started=self.started, phase=self.args.phase,
                       synthetic_data=True, load_model=getattr(self, 'load_model', 'closed-loop bounded concurrency; not a maximum capacity proof'),
                       checks=self.checks, stages=self.stages, expected_balances=getattr(self, 'expected', {}))

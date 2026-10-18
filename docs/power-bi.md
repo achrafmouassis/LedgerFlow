@@ -52,9 +52,11 @@ Le mode est **Import** : Power BI conserve une copie lors de l'actualisation.
 Un nouveau batch Airflow ne rafraîchit pas automatiquement un Desktop ouvert.
 Il faut actualiser le modèle pour voir sa nouvelle publication.
 
-Si les graphiques sont vides, vérifier que des opérations ont été créées et
-qu'un batch a publié leurs dates. La base bancaire principale n'a pas été
-remplie artificiellement. Pour publier une date à la demande :
+Si les graphiques sont vides, vérifier qu'un batch a publié la période
+sélectionnée. La base principale contient actuellement des opérations de
+démonstration synthétiques, datées principalement du 16 octobre 2026 : un
+filtre limité aux dernières 24 heures peut donc masquer ces résultats. Pour
+publier une date à la demande :
 
 ```powershell
 .\scripts\platform.ps1 exec airflow airflow dags trigger ledgerflow_daily_summary --conf '{"target_date":"2026-10-16","lookback_days":1}'

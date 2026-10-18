@@ -1,4 +1,4 @@
-# État vérifié du projet — 17 octobre 2026
+# État vérifié du projet — 18 octobre 2026
 
 Cette page sépare les fonctions présentes dans le code, les contrôles déjà
 effectués et les validations qui restent à terminer. Les données bancaires de
@@ -14,15 +14,15 @@ locaux restent dans `.work/`, ignoré par Git.
   [l'injection et ses contrôles](demo-data-validation.md).
 - L'API dispose d'une connexion par token, de rôles administrateur, opérateur,
   analyste et client, et d'une vérification serveur des comptes attribués.
-  L'interface locale montre les données renvoyées par l'API. Le dernier contrôle
-  HTTP de l'interface et des permissions contient 21 vérifications réussies.
+  L'interface locale montre les données renvoyées par l'API. Après le nouveau
+  déploiement, le contrôle HTTP en lecture seule de l'interface et des
+  permissions contient 21 vérifications réussies.
   Voir [interface et sécurité](security-and-interface.md).
-- Le 17 octobre, la suite Java du dernier code a terminé avec 53 tests, zéro
-  échec et trois tests Kafka ignorés dans la configuration H2 locale. La suite
-  précédente avec PostgreSQL et Kafka réels comptait 52 tests réussis, sans
-  échec ni test ignoré ; elle doit être relancée avec les derniers changements.
-  Les 12 tests unitaires du générateur QA et la vérification syntaxique du
-  JavaScript ont également réussi le 17 octobre.
+- Le 18 octobre, la suite Java du dernier code a terminé avec **53 tests réussis,
+  zéro échec et zéro test ignoré** sur PostgreSQL 18 et Kafka réels. Les sept
+  migrations Flyway ont été rejouées dans une base séparée
+  `ledgerflow_java_test`. Les 13 tests unitaires du générateur QA réussissent
+  également.
 - Le projet Power BI contient un rapport natif vérifié au niveau des fichiers,
   du modèle et des droits SQL de lecture. Power BI Desktop a été ouvert, mais
   son actualisation, le rendu des graphiques et les filtres n'ont pas encore été
@@ -31,30 +31,34 @@ locaux restent dans `.work/`, ignoré par Git.
 
 ## Charge et pannes : résultats actuels
 
-Les essais locaux proposaient 40 demandes par seconde pendant 60 secondes,
-avec 1, 2 puis 3 instances du backend. Les opérations acceptées ont été
-réconciliées ; aucune erreur HTTP inattendue n'a été comptée. Le budget de
-charge a échoué dans les trois cas :
+Le générateur QA regroupe ses écritures de journal dans un tampon borné et la
+base/Kafka ne sont plus redémarrés entre les tailles du backend. Deux campagnes
+stabilisées ont proposé 40 demandes par seconde pendant 60 secondes, d'abord
+avec 1, 2, 3 instances, puis dans l'ordre inverse 3, 2, 1. Chaque essai a traité
+les 2 400 demandes sans perte ni erreur, avec un p95 inférieur à deux secondes :
 
-| Instances | Demandes proposées | Terminées | Arrivées abandonnées | p95 depuis l'arrivée prévue |
-| ---: | ---: | ---: | ---: | ---: |
-| 1 | 2 400 | 1 244 | 1 156 | 9,34 s |
-| 2 | 2 400 | 1 001 | 1 399 | 10,62 s |
-| 3 | 2 400 | 1 182 | 1 218 | 9,94 s |
+| Instances | Terminées | Erreurs/pertes | Débit réalisé | p95 aller-retour, deux passages | Vidage du pipeline |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 2 400/2 400 | 0/0 | 40,01/s | 132 ms / 234 ms | 133 s / 102 s |
+| 2 | 2 400/2 400 | 0/0 | 40,00/s | 367 ms / 391 ms | 32 s / 47 s |
+| 3 | 2 400/2 400 | 0/0 | 39,99/s | 537 ms / 471 ms | 40 s / 44 s |
 
-Le générateur ouvre et ferme son fichier de journalisation à chaque réponse
-pendant la mesure. Cela peut limiter le débit d'émission sur ce poste Windows.
-Il faut corriger ce point, refaire les essais dans des conditions stables et
-conserver aussi les résultats échoués. Les chiffres ci-dessus ne prouvent pas
-que trois instances sont plus rapides. Rapports bruts :
-`.work/qa/20261016T224030-60fcc1a7/`,
-`.work/qa/20261016T224515-e23cac7e/` et
-`.work/qa/20261016T224838-6a162a45/`.
+Cela prouve le budget de **40 demandes/s pendant une minute dans cet environnement
+local stabilisé**, ainsi que la distribution exacte entre les instances. Cela ne
+prouve pas une capacité de production ni un gain horizontal : une instance avait
+la meilleure latence HTTP et PostgreSQL/Kafka restent partagés. Un passage à froid
+a aussi échoué après des redémarrages de PostgreSQL ; démarrage à froid et régime
+stabilisé doivent donc être présentés séparément. Rapports bruts :
+`.work/qa/20261018T163612-f7465ed4/` à
+`.work/qa/20261018T165016-9f994d59/`.
 
-Les sondes de panne étendues (arrêt brutal du backend, indisponibilité de
-PostgreSQL, relecture DLT et interruption de Spark) sont implémentées pour la
-base isolée `ledgerflow_qa`, mais **leur campagne complète n'est pas encore
-validée**. Voir [charge et incidents](scalability-and-incidents.md).
+La campagne de pannes complète a réussi sur la base isolée `ledgerflow_qa` :
+redémarrage après arrêt brutal du backend, indisponibilité puis reprise de
+PostgreSQL, correction et relecture d'un message rejeté, et reprise d'un batch
+Spark interrompu. Le dépôt rejoué n'a eu qu'un effet financier ; la panne DB a
+renvoyé 503 sans faux succès ; le batch interrompu n'a pas publié de résumé
+partiel. Les 33 contrôles des six rapports sont tous `PASS`, ainsi que la sonde
+DB à 503. Voir [charge et incidents](scalability-and-incidents.md).
 
 ## État d'exploitation et prochaines étapes
 
@@ -64,13 +68,14 @@ validée**. Voir [charge et incidents](scalability-and-incidents.md).
 2. Ajuster le contrôle de santé Kafka : le broker répond aux commandes, mais le
    contrôle Docker actuel dépasse régulièrement son délai de cinq secondes et
    affiche `unhealthy`.
-3. Relancer les tests Java avec PostgreSQL et Kafka réels sur le dernier code,
-   redéployer cette version de l'application et refaire les 21 contrôles HTTP.
-4. Corriger la journalisation du générateur, répéter les trois essais de charge,
-   puis exécuter et examiner la campagne de pannes isolées.
-5. Actualiser Power BI avec le compte de lecture seule et vérifier les visuels
-   et filtres. Parcourir également l'interface dans un navigateur sur ordinateur
-   et téléphone : le rendu visuel n'a pas encore été validé.
+3. Pour aller au-delà de la preuve locale, exécuter un test de plusieurs heures,
+   répété sur des machines séparées, et fixer un budget pour le délai de vidage
+   du pipeline Kafka.
+4. Actualiser Power BI avec le compte de lecture seule et vérifier les visuels
+   et filtres. Le front a été parcouru sur ordinateur et dans ses cinq vues à
+   une largeur mobile de 390 px ; le débordement du formulaire mobile a été
+   corrigé puis recontrôlé après déploiement (aucun défilement horizontal de
+   page sur les cinq vues).
 
 Le projet est une démonstration locale de backend et de data engineering, pas
 un service bancaire prêt pour une mise en ligne. Une présentation publique du

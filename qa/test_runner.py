@@ -41,6 +41,24 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual('retry-key', record['key'])
             self.assertEqual(0, record['status'])
 
+    def test_load_request_buffer_flushes_without_losing_records(self):
+        campaign = runner.Campaign.__new__(runner.Campaign)
+        campaign.lock = runner.threading.Lock()
+        campaign.buffered_requests = []
+        campaign.args = SimpleNamespace(phase='scale-1', p95_ms=2000)
+        campaign.run_id, campaign.started = 'test', '2026-10-17'
+        campaign.checks, campaign.stages = [], []
+        with tempfile.TemporaryDirectory() as directory:
+            campaign.directory = Path(directory)
+            with patch.object(runner, 'urlopen', side_effect=runner.URLError('offline')):
+                for i in range(257):
+                    campaign.request('GET', f'/test/{i}')
+            records = Path(directory) / 'requests.jsonl'
+            self.assertEqual(256, len(records.read_text().splitlines()))
+            campaign.report()
+            self.assertEqual(257, len(records.read_text().splitlines()))
+            self.assertEqual([], campaign.buffered_requests)
+
     def test_report_retains_failures_skips_and_escapes_html(self):
         campaign = runner.Campaign.__new__(runner.Campaign)
         campaign.args = SimpleNamespace(phase='full', p95_ms=2000)
