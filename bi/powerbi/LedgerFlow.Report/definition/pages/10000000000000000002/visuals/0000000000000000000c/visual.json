@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "0000000000000000000c",
   "position": {
     "x": 650,
     "y": 24,
-    "width": 606,
-    "height": 130,
     "z": 12,
+    "height": 130,
+    "width": 606,
     "tabOrder": 12
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Calculs.Etat",
-              "nativeQueryRef": "Etat"
+              "nativeQueryRef": "Etat",
+              "active": true
             }
           ]
         }

@@ -122,11 +122,12 @@ ajouter ensuite une demande d'actualisation via l'API Power BI après publicatio
 - Un test PostgreSQL vérifie les agrégats multidevises, le texte décimal exact,
   l'accès aux vues et le refus de lecture des comptes et d'écriture.
 
-Ces vérifications ne remplacent pas le chargement des données et le contrôle du
-rendu dans Desktop. Power BI Desktop a depuis été ouvert sur le poste. Lors de
-l'actualisation, il a demandé les identifiants PostgreSQL ; la réussite du
-chargement et les filtres restent à confirmer. Aucune publication cloud n'a
-été effectuée.
+Power BI Desktop a été connecté avec le compte PostgreSQL de lecture seule.
+L'actualisation et le rendu de la page **Activité bancaire** ont été confirmés :
+6 120 opérations et les douze groupes quotidiens sont visibles. Les cartes de
+montant nécessitent volontairement la sélection d'une seule devise. La seconde
+page est validée dans les fichiers du rapport, mais aucune capture visuelle de
+cette page n'est conservée. Aucune publication cloud n'a été effectuée.
 
 Validation reproductible des fichiers :
 

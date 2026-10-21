@@ -24,9 +24,10 @@ locaux restent dans `.work/`, ignoré par Git.
   `ledgerflow_java_test`. Les 13 tests unitaires du générateur QA réussissent
   également.
 - Le projet Power BI contient un rapport natif vérifié au niveau des fichiers,
-  du modèle et des droits SQL de lecture. Power BI Desktop a été ouvert, mais
-  son actualisation, le rendu des graphiques et les filtres n'ont pas encore été
-  confirmés après la demande d'identifiants PostgreSQL. Voir
+  du modèle et des droits SQL de lecture. L'actualisation PostgreSQL et le rendu
+  de la page **Activité bancaire** ont été confirmés dans Desktop : 6 120
+  opérations et les douze synthèses sont affichées. La seconde page reste
+  vérifiée au niveau de sa définition, sans capture visuelle conservée. Voir
   [Power BI](power-bi.md).
 
 ## Charge et pannes : résultats actuels
@@ -71,8 +72,8 @@ DB à 503. Voir [charge et incidents](scalability-and-incidents.md).
 3. Pour aller au-delà de la preuve locale, exécuter un test de plusieurs heures,
    répété sur des machines séparées, et fixer un budget pour le délai de vidage
    du pipeline Kafka.
-4. Actualiser Power BI avec le compte de lecture seule et vérifier les visuels
-   et filtres. Le front a été parcouru sur ordinateur et dans ses cinq vues à
+4. Conserver une capture de la seconde page Power BI si elle doit apparaître
+   dans une présentation publique. Le front a été parcouru sur ordinateur et dans ses cinq vues à
    une largeur mobile de 390 px ; le débordement du formulaire mobile a été
    corrigé puis recontrôlé après déploiement (aucun défilement horizontal de
    page sur les cinq vues).

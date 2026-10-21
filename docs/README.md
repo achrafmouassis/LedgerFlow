@@ -21,6 +21,7 @@ les flux streaming et batch, le modèle de données et les limites actuelles.
 | [Présentation LinkedIn](linkedin-demo.md) | Parcours de démonstration et limites à annoncer honnêtement |
 
 L'extension d'exploitation ajoute Airflow et Grafana. Le projet Power BI est
-disponible, avec chargement et rendu Desktop à vérifier. L'authentification
+disponible ; son chargement PostgreSQL et sa première page ont été confirmés
+dans Desktop. L'authentification
 bancaire est implémentée ; un entrepôt dimensionnel reste à développer. Le guide d'exploitation
 décrit cette extension ; la documentation complète décrit le socle initial.

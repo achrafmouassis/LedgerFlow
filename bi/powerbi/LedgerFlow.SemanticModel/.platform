@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "LedgerFlow"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "2de3cf9a-c7ee-40bd-99aa-272e8a3eb951"
+  }
+}

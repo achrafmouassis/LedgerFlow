@@ -30,9 +30,10 @@ un composant tombe en panne.
 #Backend #DataEngineering #Java #Kafka #PostgreSQL
 
 Avant publication, ajouter un lien vers le dépôt public seulement après avoir
-vérifié qu'aucun secret ni fichier `.work/` n'est suivi par Git. Ne pas inclure
-Power BI parmi les visuels démontrés tant que l'actualisation dans Desktop n'a
-pas été confirmée.
+vérifié qu'aucun secret ni fichier `.work/` n'est suivi par Git. La page
+**Activité bancaire** de Power BI peut être montrée : son chargement réel a été
+confirmé. Ne pas présenter une capture de la seconde page comme contrôlée tant
+qu'elle n'a pas été conservée.
 
 ## Démonstration courte (60 à 90 secondes)
 

@@ -9,8 +9,10 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
+annotation PBI_QueryOrder = ["Operations","Calculs","Serveur","Base"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
 ref table Operations
 ref table Calculs
 
-ref expression Serveur
-ref expression Base

@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "00000000000000000008",
   "position": {
     "x": 24,
     "y": 278,
-    "width": 600,
-    "height": 350,
     "z": 8,
+    "height": 350,
+    "width": 600,
     "tabOrder": 8
   },
   "visual": {
@@ -27,25 +27,8 @@
                 }
               },
               "queryRef": "Operations.Date",
-              "nativeQueryRef": "Date"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Operations"
-                    }
-                  },
-                  "Property": "Nombre operations"
-                }
-              },
-              "queryRef": "Operations.Nombre operations",
-              "nativeQueryRef": "Nombre operations"
+              "nativeQueryRef": "Date",
+              "active": true
             }
           ]
         },
@@ -64,6 +47,24 @@
               },
               "queryRef": "Operations.Type",
               "nativeQueryRef": "Type"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Operations"
+                    }
+                  },
+                  "Property": "Nombre operations"
+                }
+              },
+              "queryRef": "Operations.Nombre operations",
+              "nativeQueryRef": "Nombre operations"
             }
           ]
         }
@@ -91,5 +92,51 @@
         }
       ]
     }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "5a34fd3129c8ba142e81",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Operations"
+              }
+            },
+            "Property": "Date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "92c7f3441742412e1cb0",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Operations"
+              }
+            },
+            "Property": "Nombre operations"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "a176bcc7035ab93b9e52",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Operations"
+              }
+            },
+            "Property": "Type"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
   }
 }

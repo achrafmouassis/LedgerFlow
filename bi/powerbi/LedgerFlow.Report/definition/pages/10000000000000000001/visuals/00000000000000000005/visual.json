@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.1.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "00000000000000000005",
   "position": {
     "x": 328,
     "y": 130,
-    "width": 280,
-    "height": 120,
     "z": 5,
+    "height": 120,
+    "width": 280,
     "tabOrder": 5
   },
   "visual": {
@@ -55,5 +55,23 @@
         }
       ]
     }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "46e2031713e9024a430a",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Operations"
+              }
+            },
+            "Property": "Montant total"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

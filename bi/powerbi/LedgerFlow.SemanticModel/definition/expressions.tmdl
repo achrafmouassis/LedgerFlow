@@ -1,3 +1,10 @@
 expression Serveur = "localhost:5432" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 2a9cba9d-b7b4-48c5-86b4-c1ec97ae7bb0
+
+	annotation PBI_ResultType = Text
 
 expression Base = "ledgerflow" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: fdb7b5ee-136a-4a74-bde1-cdebcd11f59c
+
+	annotation PBI_ResultType = Text
+

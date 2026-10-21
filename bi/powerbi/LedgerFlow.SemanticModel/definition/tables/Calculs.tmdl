@@ -1,64 +1,77 @@
 table Calculs
+	lineageTag: 7571dca1-70d9-41d4-b176-77041bc70f11
 
 	column Execution
 		dataType: string
+		lineageTag: 18961c21-11e2-4acc-8c82-d0a5f56ebb1c
 		summarizeBy: none
 		sourceColumn: run_id
 
 	column Etat
 		dataType: string
+		lineageTag: edaeed45-5b23-400e-ab91-be6c9f6258c7
 		summarizeBy: none
 		sourceColumn: status
 
 	column Debut
 		dataType: dateTime
 		formatString: dd/MM/yyyy
+		lineageTag: 5d3d4b44-8aa8-40f5-a8fc-407c1ada8bcb
 		summarizeBy: none
 		sourceColumn: start_date
+
 		annotation UnderlyingDateTimeDataType = Date
 
 	column Fin
 		dataType: dateTime
 		formatString: dd/MM/yyyy
+		lineageTag: 06d458ad-459a-45c8-823f-92055de8ea08
 		summarizeBy: none
 		sourceColumn: end_date
+
 		annotation UnderlyingDateTimeDataType = Date
 
 	column Demarrage
 		dataType: dateTime
 		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 35239ce7-5a3f-44ab-b040-869f79f09bd7
 		summarizeBy: none
 		sourceColumn: started_at
 
 	column Termine
 		dataType: dateTime
 		formatString: dd/MM/yyyy HH:mm
+		lineageTag: f2c6b469-855f-4b3a-8124-59b4e19ce788
 		summarizeBy: none
 		sourceColumn: finished_at
 
 	column 'Operations lues'
 		dataType: int64
+		lineageTag: 710133a7-14ab-412d-aef1-fc1f933753d8
 		summarizeBy: sum
 		sourceColumn: source_count
 
 	column Groupes
 		dataType: int64
+		lineageTag: 1388fb62-c441-48b6-81c7-83059666f9ae
 		summarizeBy: sum
 		sourceColumn: group_count
 
 	column Erreur
 		dataType: string
+		lineageTag: 3c6a3ef5-4806-4f94-aecb-1ce5f88e9119
 		summarizeBy: none
 		sourceColumn: error_type
 
 	partition Calculs = m
 		mode: import
 		source =
-			let
-			    Source = PostgreSQL.Database(Serveur, Base, [CreateNavigationProperties=false]),
-			    Data = Source{[Schema="analytics", Item="bi_batch_runs"]}[Data],
-			    UTC = Table.TransformColumns(Data, {
-			        {"started_at", each if _ = null then null else DateTimeZone.RemoveZone(DateTimeZone.ToUtc(DateTimeZone.From(_))), type datetime},
-			        {"finished_at", each if _ = null then null else DateTimeZone.RemoveZone(DateTimeZone.ToUtc(DateTimeZone.From(_))), type datetime}})
-			in
-			    UTC
+				let
+				    Source = PostgreSQL.Database(Serveur, Base, [CreateNavigationProperties=false]),
+				    Data = Source{[Schema="analytics", Item="bi_batch_runs"]}[Data],
+				    UTC = Table.TransformColumns(Data, {
+				        {"started_at", each if _ = null then null else DateTimeZone.RemoveZone(DateTimeZone.ToUtc(DateTimeZone.From(_))), type datetime},
+				        {"finished_at", each if _ = null then null else DateTimeZone.RemoveZone(DateTimeZone.ToUtc(DateTimeZone.From(_))), type datetime}})
+				in
+				    UTC
+
